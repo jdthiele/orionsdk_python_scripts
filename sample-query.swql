@@ -1,0 +1,9 @@
+select n.Caption, n.UnManaged, n.MachineType, s.StatusName
+from
+  Orion.Nodes n
+JOIN
+  Orion.StatusInfo s
+  ON n.Status = s.StatusId
+WHERE s.StatusName IN ('Up', 'Active')
+AND n.UnManaged = 'False'
+ORDER BY n.caption;
