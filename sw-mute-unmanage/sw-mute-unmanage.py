@@ -4,7 +4,12 @@ import orionsdk
 import argparse
 import getpass
 import sys
+import urllib3
+from datetime import datetime
 from validations import val_date, calc_dur
+
+# disable insecure warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # define the variables needed for automating the process
 npm_server = 'SolarWinds-Orion'
@@ -60,14 +65,14 @@ elif start:
 elif stop:
     timetype = "stop"
     # assume a start time of now
-    startdate = None
+    startdate = datetime.utcnow()
     # validate stop
     stopdate = val_date(stop)
     # calculate start as now
 elif duration:
     timetype = "duration"
     # assume a start time of now
-    startdate = None
+    startdate = datetime.utcnow()
     # validate duration
     stopdate = calc_dur(startdate, duration)
 else:
@@ -83,36 +88,40 @@ else:
 swis = orionsdk.SwisClient(npm_server, user, password, verify=False)
 
 # start processing each node
+node_uris = []
 for node in nodes:
     # get the entity URI
     uri_query = 'SELECT Uri from Orion.Nodes where Caption=\'' + node + '\''
     results = swis.query(uri_query)
     node_uri = results['results'][0]['Uri']
+    node_uris.append(node_uri)
     
     # check if the node is already muted
-    query = 'SELECT A.ID, N.Caption, A.SuppressFrom, A.SuppressUntil FROM Orion.AlertSuppression A JOIN Orion.Nodes N ON N.Uri = A.EntityUri WHERE N.Caption = \'' + node + '\''
+    muted_query = 'SELECT A.ID, N.Caption, A.SuppressFrom, A.SuppressUntil FROM Orion.AlertSuppression A JOIN Orion.Nodes N ON N.Uri = A.EntityUri WHERE N.Caption = \'' + node + '\''
     muted_results = swis.query(query)
-    if muted_results:
-        print(muted_results)
+    if muted_results["results"]:
+        print(muted_results["results"])
         print("node is already muted, skipping")
         continue
 
     # check if the node is already unmanaged
-    query = 'SELECT Caption, UnManageFrom, UnManageUntil FROM Orion.Nodes WHERE Unmanaged = TRUE AND Caption = \'' + node + '\''
+    unmanaged_query = 'SELECT Caption, UnManageFrom, UnManageUntil FROM Orion.Nodes WHERE Unmanaged = TRUE AND Caption = \'' + node + '\''
     unmanaged_results = swis.query(query)
-    if unmanaged_results:
-        print(unmanaged_results)
+    if unmanaged_results["results"]:
+        print(unmanaged_results["results"])
         print("node is already unmanaged, skipping")
         continue
 
-    # mute alerts
-    if method == 'mute':
-        results = swis.invoke('Orion.AlertSuppression','SuppressAlerts', node_uri, startdate, stopdate )
-    elif method == 'unmanaged':
-        print('not ready for this yet')
-    else:
-        print('please provide a method of either "mute" or "unmanage"')
-        sys.exit(5)
+# mute alerts
+if method == 'mute':
+    results = swis.invoke('Orion.AlertSuppression','SuppressAlerts', node_uris, startdate, stopdate )
+elif method == 'unmanaged':
+    print('not ready for this yet')
+else:
+    print('please provide a method of either "mute" or "unmanage"')
+    sys.exit(5)
+
+# print results
 
 # Exit with a code of 0 indicating all went well
 sys.exit(0)

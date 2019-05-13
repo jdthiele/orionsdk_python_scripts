@@ -9,7 +9,7 @@ def val_date(date_input):
     except ValueError:
         raise ValueError("Incorrect date format, should be YYYY-MM-DD-hh-mm")
     #date = datetime.strptime(date_input, '%Y-%m-%d-%H-%M')
-    now = datetime.now()
+    now = datetime.utcnow()
     if date < now:
         print('You entered a date in the past. the dates provided need to be in the future. Exitting')
         sys.exit(3)
@@ -19,7 +19,7 @@ def val_date(date_input):
 # calculate duration
 def calc_dur(date_input, duration):
     if date_input == "now":
-        start = datetime.now()
+        start = datetime.utcnow()
     else:
         start = date_input
     dur_num = int(re.sub("\D", "", duration))
