@@ -4,7 +4,7 @@ import orionsdk
 import argparse
 import getpass
 import sys
-import validations
+from validations import val_date, calc_dur
 
 # define the variables needed for automating the process
 npm_server = 'SolarWinds-Orion'
@@ -14,14 +14,14 @@ cert='server.pem'
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--user", help="Provide the user to connect to the OrionSDK as", required=True)
 parser.add_argument("-p", "--password", help="Provide the password for the given user")
-parser.add_argument("-n", "--node", help="Provide the node you want to blackout", required=True)
-parser.add_argument("-m", "--method", help="Provide the blackout method you want to use in SolarWinds - Mute / Unmanage", required=True)
+parser.add_argument("-n", "--nodes", help="Provide a comma separated list of nodes you want to blackout without any spaces", required=True)
+parser.add_argument("-m", "--method", help="Provide the blackout method you want to use in SolarWinds - 'mute' / 'unmanage'", required=True)
 parser.add_argument("-s", "--start", help="Provide the start time")
 parser.add_argument("-S", "--stop", help="Provide the stop time")
 parser.add_argument("-d", "--duration", help="Provide the duration")
 args = parser.parse_args()
 user = args.user
-node = args.node
+nodes = args.nodes.split(",")
 method = args.method
 start = args.start
 stop = args.stop
@@ -40,25 +40,36 @@ else:
 if start and stop:
     timetype = "startandStop"
     # validate start
-    startdate = val_start(start)
+    startdate = val_date(start)
     # validate stop
+    stopdate = val_date(stop)
 elif start and duration:
     timetype = "startandDuration"
     # validate start
+    startdate = val_date(start)
     # validate duration
-    # calculate stop
+    stopdate = calc_dur(startdate, duration)
 elif start:
     timetype = "start"
+    # assume a 1 day duration when no duration or stop arguments are given
     duration = "1d"
     # validate start
+    startdate = val_date(start)
     # calculate stop as "duration" from start
+    stopdate = calc_dur(startdate, duration)
 elif stop:
     timetype = "stop"
+    # assume a start time of now
+    startdate = None
     # validate stop
+    stopdate = val_date(stop)
     # calculate start as now
 elif duration:
     timetype = "duration"
+    # assume a start time of now
+    startdate = None
     # validate duration
+    stopdate = calc_dur(startdate, duration)
 else:
     print("how did you get here??")
 
@@ -71,36 +82,37 @@ else:
 # load the swis client and login to the NPM server
 swis = orionsdk.SwisClient(npm_server, user, password, verify=False)
 
-# check if the node(s) is/are already muted/unmanaged
+# start processing each node
+for node in nodes:
+    # get the entity URI
+    uri_query = 'SELECT Uri from Orion.Nodes where Caption=\'' + node + '\''
+    results = swis.query(uri_query)
+    node_uri = results['results'][0]['Uri']
+    
+    # check if the node is already muted
+    query = 'SELECT A.ID, N.Caption, A.SuppressFrom, A.SuppressUntil FROM Orion.AlertSuppression A JOIN Orion.Nodes N ON N.Uri = A.EntityUri WHERE N.Caption = \'' + node + '\''
+    muted_results = swis.query(query)
+    if muted_results:
+        print(muted_results)
+        print("node is already muted, skipping")
+        continue
 
-# run the query and save the output
-uri_query = 'SELECT Uri from Orion.Nodes where Caption=\'' + node + '\''
-results = swis.query(uri_query)
-uri = results['results'][0]['Uri']
+    # check if the node is already unmanaged
+    query = 'SELECT Caption, UnManageFrom, UnManageUntil FROM Orion.Nodes WHERE Unmanaged = TRUE AND Caption = \'' + node + '\''
+    unmanaged_results = swis.query(query)
+    if unmanaged_results:
+        print(unmanaged_results)
+        print("node is already unmanaged, skipping")
+        continue
 
-# update the property
-obj = swis.read(uri)
-print('Before - MachineType: ' + obj['MachineType'])
-print('         SysObjectID: ' + obj['SysObjectID'])
-swis.update(uri, MachineType=machinetype, SysObjectID=machinetype)
-obj = swis.read(uri)
-print('After -  MachineType: ' + obj['MachineType'])
-print('         SysObjectID: ' + obj['SysObjectID'])
-
-# get the Technology Polling Assignment URI
-uri_query = 'SELECT N.NodeID, T.Uri FROM Orion.TechnologyPollingAssignments T JOIN Orion.Nodes N ON N.NodeID = T.InstanceID WHERE N.Caption = \'' + node + '\' AND T.TechnologyPollingID = \'Core.Node.NodeDetails\' AND T.TargetEntity = \'Orion.Nodes\''
-results = swis.query(uri_query)
-uri = results['results'][0]['Uri']
-netObjId = results['results'][0]['NodeID']
-netObjIdList = [netObjId]
-
-# update the property
-obj = swis.read(uri)
-print('Before - NodeDetails Polling Enabled: ' + str(obj["Enabled"]))
-#swis.update(uri, Enabled=False)
-swis.invoke('Orion.TechnologyPollingAssignments', 'DisableAssignmentsOnNetObjects', 'Core.Node.NodeDetails', netObjIdList)
-obj = swis.read(uri)
-print('After  - NodeDetails Polling Enabled: ' + str(obj['Enabled']))
+    # mute alerts
+    if method == 'mute':
+        results = swis.invoke('Orion.AlertSuppression','SuppressAlerts', node_uri, startdate, stopdate )
+    elif method == 'unmanaged':
+        print('not ready for this yet')
+    else:
+        print('please provide a method of either "mute" or "unmanage"')
+        sys.exit(5)
 
 # Exit with a code of 0 indicating all went well
 sys.exit(0)
