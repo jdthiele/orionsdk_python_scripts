@@ -4,9 +4,7 @@ import orionsdk
 import argparse
 import getpass
 import sys
-
-# disable some annoying warning about SSL i think it was
-requests.packages.urllib3.disable_warnings()
+import validations
 
 # define the variables needed for automating the process
 npm_server = 'SolarWinds-Orion'
@@ -14,19 +12,55 @@ cert='server.pem'
 
 # handle some arguments
 parser = argparse.ArgumentParser()
-group = parser.add_mutually_exclusive_group(required=True)
 parser.add_argument("-u", "--user", help="Provide the user to connect to the OrionSDK as", required=True)
 parser.add_argument("-p", "--password", help="Provide the password for the given user")
-parser.add_argument("-n", "--node", help="Provide the node you want to update the machinetype property on", required=True)
+parser.add_argument("-n", "--node", help="Provide the node you want to blackout", required=True)
+parser.add_argument("-m", "--method", help="Provide the blackout method you want to use in SolarWinds - Mute / Unmanage", required=True)
 parser.add_argument("-s", "--start", help="Provide the start time")
 parser.add_argument("-S", "--stop", help="Provide the stop time")
 parser.add_argument("-d", "--duration", help="Provide the duration")
 args = parser.parse_args()
 user = args.user
 node = args.node
+method = args.method
 start = args.start
 stop = args.stop
 duration = args.duration
+
+# check for proper timing type arguments
+if start or stop or duration:
+    if stop and duration:
+        print("I cannot take a stop time with duration")
+        sys.exit(2)
+else:
+    print("please provide a start stop or duration argument")
+    sys.exit(1)
+
+# set the plan timing type and validate/calculate values
+if start and stop:
+    timetype = "startandStop"
+    # validate start
+    startdate = val_start(start)
+    # validate stop
+elif start and duration:
+    timetype = "startandDuration"
+    # validate start
+    # validate duration
+    # calculate stop
+elif start:
+    timetype = "start"
+    duration = "1d"
+    # validate start
+    # calculate stop as "duration" from start
+elif stop:
+    timetype = "stop"
+    # validate stop
+    # calculate start as now
+elif duration:
+    timetype = "duration"
+    # validate duration
+else:
+    print("how did you get here??")
 
 # ask for a password if not provided in args
 if args.password:
@@ -35,7 +69,9 @@ else:
     password = getpass.getpass()
 
 # load the swis client and login to the NPM server
-swis = orionsdk.SwisClient(npm_server, user, password, verify=cert)
+swis = orionsdk.SwisClient(npm_server, user, password, verify=False)
+
+# check if the node(s) is/are already muted/unmanaged
 
 # run the query and save the output
 uri_query = 'SELECT Uri from Orion.Nodes where Caption=\'' + node + '\''
