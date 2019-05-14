@@ -13,7 +13,7 @@ from manage import mute_nodes, unmanage_nodes
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # define the variables needed for automating the process
-npm_server = 'SolarWinds-Orion'
+npm_server = 'solarwinds.hctra.pri'
 cert='server.pem'
 
 # handle some arguments

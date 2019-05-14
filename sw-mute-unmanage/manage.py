@@ -10,7 +10,7 @@ def get_node_uris (nodes, swis):
         node_noi = "N:" + str(node_noi)
         node_uris.append(node_uri)
         node_nois.append(node_noi)
-    return node_uris, node_noi
+    return node_uris, node_nois
 
 
 def check_nodes (nodes, swis, check_type):
@@ -44,8 +44,9 @@ def mute_nodes (nodes, swis, startdate, stopdate):
     # precheck nodes to see if they're already muted/unmanaged
     verified_nodes = check_nodes(nodes, swis, 'pre')
     # get node uris
-    node_uris = get_node_uris(verified_nodes, swis)
+    node_uris, node_nois = get_node_uris(verified_nodes, swis)
     # mute alerts
+    print(node_uris)
     results = swis.invoke('Orion.AlertSuppression','SuppressAlerts', node_uris, startdate, stopdate)
     # post check nodes to verify dates
     check_nodes(verified_nodes, swis, 'post-mute')
@@ -56,9 +57,10 @@ def unmanage_nodes (nodes, swis, startdate, stopdate):
     # precheck nodes to see if they're already muted/unmanaged
     verified_nodes = check_nodes(nodes, swis, 'pre')
     # get node uris
-    node_uris, node_noi = get_node_uris(verified_nodes, swis)
+    node_uris, node_nois = get_node_uris(verified_nodes, swis)
     # unmanage nodes
-    results = swis.invoke('Orion.Nodes','Unmanage', node_noi, startdate, stopdate, False)
+    for node_noi in node_nois:
+        results = swis.invoke('Orion.Nodes','Unmanage', node_noi, startdate, stopdate, False)
     # post check nodes to verify dates
     check_nodes(verified_nodes, swis, 'post-unmanage')
     return results
