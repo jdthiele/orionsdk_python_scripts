@@ -46,7 +46,6 @@ def mute_nodes (nodes, swis, startdate, stopdate):
     # get node uris
     node_uris, node_nois = get_node_uris(verified_nodes, swis)
     # mute alerts
-    print(node_uris)
     results = swis.invoke('Orion.AlertSuppression','SuppressAlerts', node_uris, startdate, stopdate)
     # post check nodes to verify dates
     check_nodes(verified_nodes, swis, 'post-mute')

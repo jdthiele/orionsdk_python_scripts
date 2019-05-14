@@ -2,6 +2,8 @@
 
 This script helps with the process of muting or unmanaging large numbers of nodes in SolarWinds. For any questions, don't hesitate to reach out to David, or submit an issue/pull request.
 
+This package utilizes the orionsdk-python package that SolarWinds publishes here: https://github.com/solarwinds/orionsdk-python. See that package for initial setup of the SDK and other problems with the SDK.
+
 ## Install
 
 ``` shell
