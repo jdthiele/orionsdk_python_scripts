@@ -53,3 +53,7 @@ The below examples assume a user of "dthiele" and node of "server1"
 `python3 sw-mute-unmanage.py -u dthiele -d 12h -m mute -n server1,server2,server3`
 - read the list of hosts from a file/template  
 ``python3 sw-mute-unmanage.py -u dthiele -d 12h -m mute -n `cat serverlist.txt` ``
+
+### Resume Mode
+
+- This is coming soon
