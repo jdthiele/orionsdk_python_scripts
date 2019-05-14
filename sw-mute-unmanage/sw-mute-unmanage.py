@@ -12,20 +12,18 @@ from manage import mute_nodes, unmanage_nodes
 # disable insecure warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# define the variables needed for automating the process
-npm_server = 'solarwinds.hctra.pri'
-cert='server.pem'
-
 # handle some arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--user", help="Provide the user to connect to the OrionSDK as", required=True)
 parser.add_argument("-p", "--password", help="Provide the password for the given user")
 parser.add_argument("-n", "--nodes", help="Provide a comma separated list of nodes you want to blackout without any spaces", required=True)
+parser.add_argument("-w", "--npm_server", help="Provide the name of the SolarWinds server", required=True)
 parser.add_argument("-m", "--method", help="Provide the blackout method you want to use in SolarWinds - 'mute' / 'unmanage'", required=True)
 parser.add_argument("-s", "--start", help="Provide the start time")
 parser.add_argument("-S", "--stop", help="Provide the stop time")
 parser.add_argument("-d", "--duration", help="Provide the duration")
 args = parser.parse_args()
+npm_server = args.npm_server
 user = args.user
 nodes = args.nodes.split(",")
 method = args.method
