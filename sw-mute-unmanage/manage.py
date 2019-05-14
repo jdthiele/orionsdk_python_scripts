@@ -5,13 +5,11 @@ def get_node_uris (nodes, swis):
         # get the entity URI and netOjbId
         uri_query = 'SELECT Caption, NodeID, Uri from Orion.Nodes where Caption=\'' + node + '\''
         results = swis.query(uri_query)
-        print(results)
         node_uri = results['results'][0]['Uri']
         node_noi = results['results'][0]['NodeID']
         node_noi = "N:" + str(node_noi)
         node_uris.append(node_uri)
         node_nois.append(node_noi)
-    print(node_nois)
     return node_uris, node_noi
 
 
