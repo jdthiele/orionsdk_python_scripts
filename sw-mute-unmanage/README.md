@@ -28,15 +28,15 @@ cd ~/gitrepos/orionsdk-python_scripts/sw-mute-unmanage
 The below examples assume a user of "dthiele" and node of "server1"
 
 - Specify a start and stop date/time  
-`python3 sw-mute-unmanage.py -u dthiele -s 2019-05-14-00-00 -S 2019-05-15-00-00 -m mute -n server1`
+`python3 sw-mute-unmanage.py -u dthiele -m mute -n server1 -s 2019-05-14-00-00 -S 2019-05-15-00-00`
 - Specify a start and duration  
-`python3 sw-mute-unmanage.py -u dthiele -s 2019-05-14-00-00 -d 12h -m mute -n server1`
+`python3 sw-mute-unmanage.py -u dthiele -m mute -n server1 -s 2019-05-14-00-00 -d 12h`
 - Specify a duration (assumes immediate start) given in days or hours  
-`python3 sw-mute-unmanage.py -u dthiele -d 12h -m mute -n server1`
+`python3 sw-mute-unmanage.py -u dthiele -m mute -n server1 -d 12h`
 - Specify a stop (assumes immediate start)  
-`python3 sw-mute-unmanage.py -u dthiele -S 2019-05-15-00-00 -m mute -n server1`
+`python3 sw-mute-unmanage.py -u dthiele -m mute -n server1 -S 2019-05-15-00-00`
 - Specify a start (assumes 1 day duration)  
-`python3 sw-mute-unmanage.py -u dthiele -s 2019-05-14-00-00 -m mute -n server1`
+`python3 sw-mute-unmanage.py -u dthiele -m mute -n server1 -s 2019-05-14-00-00`
 
 ### Mode Variation Examples
 
