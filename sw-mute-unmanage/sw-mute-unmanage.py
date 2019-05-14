@@ -91,7 +91,7 @@ swis = orionsdk.SwisClient(npm_server, user, password, verify=False)
 # mute alerts
 if method == 'mute':
     mute_nodes(nodes, swis, startdate, stopdate)
-elif method == 'unmanaged':
+elif method == 'unmanage':
     unmanage_nodes(nodes, swis, startdate, stopdate)
 else:
     print('please provide a method of either "mute" or "unmanage"')

@@ -3,12 +3,15 @@ def get_node_uris (nodes, swis):
     node_nois = [] #noi = net object ID
     for node in nodes:
         # get the entity URI and netOjbId
-        uri_query = 'SELECT Uri from Orion.Nodes where Caption=\'' + node + '\''
+        uri_query = 'SELECT Caption, NodeID, Uri from Orion.Nodes where Caption=\'' + node + '\''
         results = swis.query(uri_query)
+        print(results)
         node_uri = results['results'][0]['Uri']
         node_noi = results['results'][0]['NodeID']
+        node_noi = "N:" + str(node_noi)
         node_uris.append(node_uri)
         node_nois.append(node_noi)
+    print(node_nois)
     return node_uris, node_noi
 
 
@@ -55,10 +58,9 @@ def unmanage_nodes (nodes, swis, startdate, stopdate):
     # precheck nodes to see if they're already muted/unmanaged
     verified_nodes = check_nodes(nodes, swis, 'pre')
     # get node uris
-    node_uris, node_nois = get_node_uris(verified_nodes, swis)
+    node_uris, node_noi = get_node_uris(verified_nodes, swis)
     # unmanage nodes
-    for node_noi in node_nois:
-        results = swis.invoke('Orion.Nodes','Unmanage', node_noi, startdate, stopdate, False)
+    results = swis.invoke('Orion.Nodes','Unmanage', node_noi, startdate, stopdate, False)
     # post check nodes to verify dates
     check_nodes(verified_nodes, swis, 'post-unmanage')
     return results
