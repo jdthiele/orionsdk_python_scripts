@@ -42,11 +42,17 @@ if start or stop or duration:
     if stop and duration:
         print("I cannot take a stop time with duration")
         sys.exit(2)
+    if method == 'resume':
+        print("NOTICE: resume method will ignore any time arguments given")
+        start = None
+        stop = None
+        duration = None
 elif method == 'resume':
     True
 else:
     print("please provide a start stop or duration argument")
     sys.exit(1)
+
 
 # set the plan timing type and validate/calculate values
 if start and stop:
@@ -77,6 +83,8 @@ elif duration:
     startdate = datetime.utcnow()
     # validate duration
     stopdate = calc_dur(startdate, duration)
+elif method == 'resume':
+    True
 else:
     print("how did you get here??")
 

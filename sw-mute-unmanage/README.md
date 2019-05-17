@@ -56,4 +56,5 @@ The below examples assume a user of "dthiele" and node of "server1"
 
 ### Resume Mode
 
-- This is coming soon
+- Unmute and/or remanage a server or set of servers
+`python3 sw-mute-unmanage.py -w solarwinds -u dthiele -m resume -n server1,server2,server3`

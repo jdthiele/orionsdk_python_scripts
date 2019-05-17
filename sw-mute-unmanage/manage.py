@@ -16,30 +16,47 @@ def get_node_uris (nodes, swis):
 def check_nodes (nodes, swis, check_type):
     verified_nodes = []
     for node in nodes:
+        # check if node exists in SolarWinds
+        uri_query = 'SELECT Caption, NodeID, Uri from Orion.Nodes where Caption=\'' + node + '\''
+        uri_results = swis.query(uri_query)
+        if len(uri_results['results']) == 0:
+            print("Warning: " + node + " does not exist in SolarWinds. skipping")
+            continue
+
         # gather mute status
         muted_query = 'SELECT A.ID, N.Caption, A.SuppressFrom, A.SuppressUntil FROM Orion.AlertSuppression A JOIN Orion.Nodes N ON N.Uri = A.EntityUri WHERE N.Caption = \'' + node + '\''
         muted_results = swis.query(muted_query)
-        muted_results = muted_results["results"][0]
+        if len(muted_results["results"]) == 0:
+            muted_results = None
+        else:
+            muted_results = muted_results["results"][0]
 
         # gather unmanaged status
         unmanaged_query = 'SELECT Caption, UnManageFrom, UnManageUntil FROM Orion.Nodes WHERE Unmanaged = TRUE AND Caption = \'' + node + '\''
         unmanaged_results = swis.query(unmanaged_query)
-        unmanaged_results = unmanaged_results["results"][0]
+        if len(unmanaged_results["results"]) == 0:
+            unmanaged_results = None
+        else:
+            unmanaged_results = unmanaged_results["results"][0]
 
         # if pre-check and already muted or unmanaged, skip it!
         if check_type == 'pre' and ( muted_results or unmanaged_results ):
-            print(muted_results)
-            print(unmanaged_results)
+            if muted_results:
+                print(muted_results)
+            if unmanaged_results:
+                print(unmanaged_results)
             print(node + " is already muted muted or unmanaged, skipping")
             continue
         # if pre-resume and no mutes or umanages in place, skip it!
-        elif check_type == 'resume' and ( muted_results == None or unmanaged_results == None ):
-            print(muted_results + '\n' + unmanaged_results)
+        elif check_type == 'resume' and muted_results == None and unmanaged_results == None:
+            print(node + " is not muted or unmanaged, skipping")
         # if post checks, print the respective results for verification of dates
         elif check_type == 'post-mute':
-            print(muted_results)
+            if muted_results:
+                print(muted_results)
         elif check_type == 'post-unmanage':
-            print(unmanaged_results)
+            if unmanaged_results:
+                print(unmanaged_results)
         elif check_type == 'post-resume':
             verified_nodes.append(node)
         # else add it to verified hosts for processing
