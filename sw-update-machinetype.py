@@ -10,7 +10,7 @@ requests.packages.urllib3.disable_warnings()
 
 # define the variables needed for automating the process
 npm_server = 'SolarWinds-Orion'
-cert='server.pem'
+#cert='server.pem'
 
 # handle some arguments
 parser = argparse.ArgumentParser()
@@ -30,11 +30,14 @@ else:
     password = getpass.getpass()
 
 # load the swis client and login to the NPM server
-swis = orionsdk.SwisClient(npm_server, user, password, verify=cert)
+swis = orionsdk.SwisClient(npm_server, user, password, verify=False)
 
 # run the query and save the output
 uri_query = 'SELECT Uri from Orion.Nodes where Caption=\'' + node + '\''
 results = swis.query(uri_query)
+if results['results'] == []:
+    print('Did not find a host with this name. Exitting.')
+    sys.exit(1)
 uri = results['results'][0]['Uri']
 
 # update the property
