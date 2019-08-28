@@ -21,9 +21,13 @@ parser = argparse.ArgumentParser(description=help_header)
 parser.add_argument("-s", "--npm_server", help="Provide the name of the SolarWinds server", required=True)
 parser.add_argument("-u", "--user", help="Provide the user to connect to the OrionSDK as", required=True)
 parser.add_argument("-p", "--password", help="Provide the password for the given user, or omit to be prompted")
+parser.add_argument("-a", "--attribute", help="Provide the attribute to update", required=True)
+parser.add_argument("-v", "--value", help="Provide the value to set for the given attribute", required=True)
 args = parser.parse_args()
 npm_server = args.npm_server
 user = args.user
+custom_attr = args.attribute
+custom_val = args.value
 
 # ask for a password if not provided in args
 if args.password:
