@@ -11,17 +11,17 @@ import json
 requests.packages.urllib3.disable_warnings()
 
 # define the variables needed for automating the process
-npm_server = 'SolarWinds-Orion'
-cert='server.pem'
 printcsv = False
 
 # handle some arguments
 parser = argparse.ArgumentParser()
+parser.add_argument("-s", "--npmserver", help="Provide the hostname of the npm server to connect to", required=True)
 parser.add_argument("-u", "--user", help="Provide the user to connect to the OrionSDK as", required=True)
 parser.add_argument("-p", "--password", help="Provide the password for the orionsdk-api user. Look in KeePass")
 parser.add_argument("-f", "--queryfile", help="Provide the path to the SWQL query file you want to run against the SW database", required=True)
 parser.add_argument("-c", "--csv", help="Print in csv format", action='store_true')
 args = parser.parse_args()
+npm_server = args.npmserver
 user = args.user
 queryfile = args.queryfile
 
@@ -36,7 +36,7 @@ else:
     password = getpass.getpass()
 
 # load the swis client and login to the NPM server
-swis = orionsdk.SwisClient(npm_server, user, password, verify=cert)
+swis = orionsdk.SwisClient(npm_server, user, password, verify=False)
 
 # define the query to run via the client
 with open(queryfile) as f:
