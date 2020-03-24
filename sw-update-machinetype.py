@@ -42,14 +42,14 @@ for node in nodes:
   uri = results['results'][0]['Uri']
   
   # update the property
-  obj = swis.read(uri)
-  print('Updating the MachineType on ' + node + 'to be '+ machinetype)
-  print('Before - MachineType: ' + obj['MachineType'])
-  print('         SysObjectID: ' + obj['SysObjectID'])
+  #obj = swis.read(uri)
+  #print('Before - MachineType: ' + obj['MachineType'])
+  #print('         SysObjectID: ' + obj['SysObjectID'])
   swis.update(uri, MachineType=machinetype, SysObjectID=machinetype)
-  obj = swis.read(uri)
-  print('After -  MachineType: ' + obj['MachineType'])
-  print('         SysObjectID: ' + obj['SysObjectID'])
+  print('Updated the MachineType on ' + node + 'to be '+ machinetype)
+  #obj = swis.read(uri)
+  #print('After -  MachineType: ' + obj['MachineType'])
+  #print('         SysObjectID: ' + obj['SysObjectID'])
   
   # get the Technology Polling Assignment URI
   uri_query = 'SELECT N.NodeID, T.Uri FROM Orion.TechnologyPollingAssignments T JOIN Orion.Nodes N ON N.NodeID = T.InstanceID WHERE N.Caption = \'' + node + '\' AND T.TechnologyPollingID = \'Core.Node.NodeDetails\' AND T.TargetEntity = \'Orion.Nodes\''
