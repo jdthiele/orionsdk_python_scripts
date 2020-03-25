@@ -45,7 +45,7 @@ def check_nodes (nodes, swis, check_type):
                 print(muted_results)
             if unmanaged_results:
                 print(unmanaged_results)
-            print(node + " is already muted muted or unmanaged, skipping")
+            print(node + " is already muted or unmanaged, skipping")
             continue
         # if pre-resume and no mutes or umanages in place, skip it!
         elif check_type == 'resume' and muted_results == None and unmanaged_results == None:
