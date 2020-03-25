@@ -6,8 +6,15 @@ import getpass
 import sys
 import urllib3
 from datetime import datetime
-from sw_mute_unmanage.manage import mute_nodes, unmanage_nodes, resume_nodes
-from sw_mute_unmanage.date_validations import val_date, calc_dur
+from . import manage #import mute_nodes, unmanage_nodes, resume_nodes
+from . import date_validations #import val_date, calc_dur
+
+#shorten functions path
+mute_nodes = manage.mute_nodes
+unmanage_nodes = manage.unmanage_nodes
+resume_nodes = manage.resume_nodes
+val_date = date_validations.val_date
+calc_dur = date_validations.calc_dur
 
 # disable insecure warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
