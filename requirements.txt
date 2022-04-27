@@ -6,7 +6,7 @@ idna==2.9
 isort==4.3.21
 lazy-object-proxy==1.4.3
 mccabe==0.6.1
-numpy==1.18.2
+numpy==1.21.0
 orionsdk==0.3.0
 pandas==1.0.3
 pylint==2.4.4
